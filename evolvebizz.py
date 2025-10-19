@@ -13,8 +13,6 @@ import schedule
 import time
 import pickle
 from datetime import datetime
-# schedule.every, while, polling - all loops
-#driver.save_screenshot("D:\Vladislav\Desktop\evolveee.png")
 
 class AnyEc:
     """ Use with WebDriverWait to combine expected_conditions
@@ -48,12 +46,12 @@ def cookies_savingfresh(driver, cookies_loaded_storage):
 
     cookies_fresh = []
 
-    #take new cookies
+    # take new cookies
     for cookie in cookies_final_storage:
         if cookie not in cookies_loaded_storage:
             cookies_fresh.append(cookie)
 
-    #add old to new without duplicates (cookies integrity)
+    # add old to new without duplicates (cookies integrity)
     fresh_names = []
     for cookie in cookies_fresh:
         fresh_names.append(cookie['name'])
@@ -68,7 +66,7 @@ def cookies_savingfresh(driver, cookies_loaded_storage):
 
 
 def request_comp(driver, userAgent):
-    #get cookies for post request (we can use local cookies)
+    # get cookies for post request (we can use local cookies)
     cookies = driver.get_cookies()
 
     for dict in cookies:
@@ -81,17 +79,17 @@ def request_comp(driver, userAgent):
 
     cookie = R3ACTLB_cookies + '; ' + XSRFTOKEN_cookies + '; ' + laravelsession_cookies
 
-    #get token
+    # get token
     search = driver.find_element(By.NAME, 'csrf-token')
     token_row = search.get_attribute('outerHTML')
     token = token_row[33:-2]
 
-    #post request composition
+    # post request composition
     bizz_data = {
         '_token': token
     }
     bizz_header = {
-        'Host': 'REMOVED',
+        'Host': 'your-domain.com',
         'User-Agent': userAgent,
         'Accept': 'application/json, text/javascript, */*; q=0.01',
         'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
@@ -99,9 +97,9 @@ def request_comp(driver, userAgent):
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         'X-Requested-With': 'XMLHttpRequest',
         'Content-Length': '47',
-        'Origin': 'https://REMOVED',
+        'Origin': 'https://your-domain.com',
         'Connection': 'keep-alive',
-        'Referer': 'https://REMOVED/login/stats/business',
+        'Referer': 'https://your-domain.com/login/stats/business',
         'Cookie': cookie,
         'Sec-Fetch-Dest': 'empty',
         'Sec-Fetch-Mode': 'cors',
@@ -110,7 +108,7 @@ def request_comp(driver, userAgent):
         'TE': 'trailers'
     }
 
-    bizz = requests.post('https://REMOVED/api_user/get_m_bizz',data=bizz_data,headers=bizz_header)
+    bizz = requests.post('https://your-domain.com/api_user/get_m_bizz',data=bizz_data,headers=bizz_header)
 
     return bizz
 
@@ -121,10 +119,10 @@ def extract_bizz():
     options.add_argument(f'user-agent={userAgent}')
 
     driver = webdriver.Chrome(options=options)
-    URL = 'https://REMOVED/login'
+    URL = 'https://your-domain.com/login'
     timeout = 70
 
-    #LOGIN page
+    # LOGIN page
     driver.get(URL)
 
     cookies_loaded_storage = cookies_loading(driver)
@@ -146,18 +144,18 @@ def extract_bizz():
         return 0
 
     if not authorized:
-        #print('NOT AUTHORIZED')
+        # print('NOT AUTHORIZED')
         search = driver.find_element(By.ID, 'username')
-        search.send_keys("REMOVED")
+        search.send_keys("Nick_Name")
         search = driver.find_element(By.ID, 'password')
-        search.send_keys("REMOVED")
+        search.send_keys("password")
         search = driver.find_element(By.ID, 'select_server_1')
         search.send_keys(Keys.RETURN)
 
         search = driver.find_element(By.ID, 'auth')
         search.send_keys(Keys.RETURN)
 
-        #UCP page
+        # UCP page
         try:
             res = WebDriverWait(driver, timeout).until(AnyEc(EC.presence_of_element_located((By.XPATH, "//div[@class='ucp--content']")), EC.presence_of_element_located((By.XPATH, "//div[@class='auth-warning-window']//p[text()='Вы точно не робот? Обнови-ка страничку']"))))
 
@@ -168,13 +166,13 @@ def extract_bizz():
 
                 cookies_savingfresh(driver, cookies_loaded_storage)
 
-                #DATA EXCTRACTING
+                # DATA EXTRACTING
                 bizz = request_comp(driver, userAgent)
                 driver.quit()
             except NoSuchElementException: # if auth-warning-window
                 print('NOT AUTHORIZED: A ROBOT', flush=True)
                 return 0
-                #ACTIONS TO DODGE DETECTION
+                # ACTIONS TO DODGE DETECTION
                 search.send_keys(Keys.RETURN)
                 time.sleep(1)
                 search.send_keys(Keys.RETURN)
@@ -184,7 +182,7 @@ def extract_bizz():
                 time.sleep(40)
                 cookies_savingfresh(driver, cookies_loaded_storage)
                 
-                #DATA EXCTRACTING
+                #DATA EXTRACTING
                 bizz = request_comp(driver, userAgent)
                 driver.quit()
                 
@@ -197,21 +195,21 @@ def extract_bizz():
     else:
         cookies_savingfresh(driver, cookies_loaded_storage)
 
-        #DATA EXCTRACTING
+        # DATA EXCTRACTING
         bizz = request_comp(driver, userAgent)
         driver.quit()
 
     try:
         return bizz.json()
     except ValueError:
-        #print("Server sent not JSON file / JSON conversion error", flush=True)
+        # print("Server sent not JSON file / JSON conversion error", flush=True)
         return 0
 
 
 #
 # TeleBot
 #
-API_KEY = 'REMOVED'
+API_KEY = 'your_bot_token'
 bot = telebot.TeleBot(API_KEY)
 
 def bizz_get_job(id):
@@ -235,16 +233,16 @@ def bizz_get_job(id):
     else:   
         bot.send_message(id, "Fail after 3 attempts to retrieve data. Look at the log")
 
-IDADMIN = REMOVED # is an only user
-schedule.every().hour.at(":03").do(bizz_get_job, id=IDADMIN) #id = [list]
-#schedule.every(3).minutes.do(bizz_get_job, id=IDADMIN)
+IDADMIN = id_tg # is the only user
+schedule.every().hour.at(":03").do(bizz_get_job, id=IDADMIN) # id = [list]
+# schedule.every(3).minutes.do(bizz_get_job, id=IDADMIN)
 SCH_ENABLED = False
 
 @bot.message_handler(commands=["start"])
 def bizz_schedule(message):
     global SCH_ENABLED
 
-    if message.chat.id == IDADMIN: #admin
+    if message.chat.id == IDADMIN: # admin
         if not SCH_ENABLED:
             bot.send_message(IDADMIN, "Bot has been activated")
             SCH_ENABLED = True
@@ -260,12 +258,11 @@ def bizz_schedule(message):
 
 @bot.message_handler(commands=["stop"])
 def bizz_stop(message):
-    if message.chat.id == IDADMIN: #admin
+    if message.chat.id == IDADMIN: # admin
         global SCH_ENABLED
 
         SCH_ENABLED = False
 
         bot.send_message(message.chat.id, 'Bot was stopped')
 
-#bot.polling(none_stop=True, timeout=60, long_polling_timeout=60, interval=60) # --- ???
 bot.infinity_polling(timeout=70, long_polling_timeout = 70)
