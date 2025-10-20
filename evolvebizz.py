@@ -89,7 +89,7 @@ def request_comp(driver, userAgent):
         '_token': token
     }
     bizz_header = {
-        'Host': 'your-domain.com',
+        'Host': 'hidden-domain.com',
         'User-Agent': userAgent,
         'Accept': 'application/json, text/javascript, */*; q=0.01',
         'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
@@ -97,9 +97,9 @@ def request_comp(driver, userAgent):
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         'X-Requested-With': 'XMLHttpRequest',
         'Content-Length': '47',
-        'Origin': 'https://your-domain.com',
+        'Origin': 'https://hidden-domain.com',
         'Connection': 'keep-alive',
-        'Referer': 'https://your-domain.com/login/stats/business',
+        'Referer': 'https://hidden-domain.com/login/stats/business',
         'Cookie': cookie,
         'Sec-Fetch-Dest': 'empty',
         'Sec-Fetch-Mode': 'cors',
@@ -108,7 +108,7 @@ def request_comp(driver, userAgent):
         'TE': 'trailers'
     }
 
-    bizz = requests.post('https://your-domain.com/api_user/get_m_bizz',data=bizz_data,headers=bizz_header)
+    bizz = requests.post('https://hidden-domain.com/api_user/get_m_bizz',data=bizz_data,headers=bizz_header)
 
     return bizz
 
@@ -119,7 +119,7 @@ def extract_bizz():
     options.add_argument(f'user-agent={userAgent}')
 
     driver = webdriver.Chrome(options=options)
-    URL = 'https://your-domain.com/login'
+    URL = 'https://hidden-domain.com/login'
     timeout = 70
 
     # LOGIN page
